@@ -17,6 +17,8 @@ const TOP = [
   "arbitrage",
   "marketmaker",
   "template",
+  "ai",
+  "subscription",
   "upgrade",
   "config",
   "completion",

@@ -1,6 +1,23 @@
 # Changelog
 
-## 0.2.0-alpha.1 — Unreleased
+## 0.3.0-alpha.1 — Unreleased
+
+Follows `@cryptohopper/sdk@0.3.0-alpha.1`. Adds CLI commands for the A2 resources that make sense in a terminal.
+
+### Added
+- **`ai credits`** — remaining AI credit balance.
+- **`ai models`** — LLM models available to the account.
+- **`subscription get`** — account-level subscription state.
+- **`subscription plans`** — list available plans (public, no auth).
+- **`subscription credits`** — remaining platform credits.
+
+(Platform / chart commands deferred — their endpoints are web-UI focused, little CLI value.)
+
+### Changed
+- `@cryptohopper/sdk` dep bumped to `^0.3.0-alpha.1`.
+- Shell completions updated with `ai` and `subscription`.
+
+## 0.2.0-alpha.1 — 2026-04-24
 
 Follows `@cryptohopper/sdk@0.2.0-alpha.1` and adds CLI commands for the new resources.
 

@@ -38,6 +38,15 @@ import {
   templateLoadCommand,
   templateDeleteCommand,
 } from "./commands/template.js";
+import {
+  aiCreditsCommand,
+  aiModelsCommand,
+} from "./commands/ai.js";
+import {
+  subscriptionGetCommand,
+  subscriptionPlansCommand,
+  subscriptionCreditsCommand,
+} from "./commands/subscription.js";
 import { cleanupStaleOld } from "./upgrade/swap.js";
 import { CURRENT_VERSION } from "./version.js";
 
@@ -308,6 +317,54 @@ template
   .option("--json", "Emit machine-readable JSON")
   .action(async (id: string, opts) => {
     await templateDeleteCommand(id, { yes: !!opts.yes, json: !!opts.json });
+  });
+
+// ─── AI ──────────────────────────────────────────────────────────────────
+
+const ai = program.command("ai").description("AI assistant features");
+
+ai.command("credits")
+  .description("Remaining AI credit balance")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await aiCreditsCommand({ json: !!opts.json });
+  });
+
+ai.command("models")
+  .description("LLM models available to the authenticated user")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await aiModelsCommand({ json: !!opts.json });
+  });
+
+// ─── Subscription ────────────────────────────────────────────────────────
+
+const subscription = program
+  .command("subscription")
+  .description("Subscription plans, account state, and platform credits");
+
+subscription
+  .command("get")
+  .description("Account-level subscription state")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await subscriptionGetCommand({ json: !!opts.json });
+  });
+
+subscription
+  .command("plans")
+  .description("List available subscription plans (public)")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await subscriptionPlansCommand({ json: !!opts.json });
+  });
+
+subscription
+  .command("credits")
+  .description("Remaining platform credits on the account")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await subscriptionCreditsCommand({ json: !!opts.json });
   });
 
 // ─── Upgrade ─────────────────────────────────────────────────────────────
