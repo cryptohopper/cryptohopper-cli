@@ -19,6 +19,25 @@ import {
 import { upgradeCommand } from "./commands/upgrade.js";
 import { configGetCommand, configSetCommand } from "./commands/config.js";
 import { completionCommand } from "./commands/completion.js";
+import {
+  signalsListCommand,
+  signalsStatsCommand,
+  signalsPerformanceCommand,
+} from "./commands/signals.js";
+import {
+  arbitrageHistoryCommand,
+  arbitrageTotalCommand,
+} from "./commands/arbitrage.js";
+import {
+  marketmakerGetCommand,
+  marketmakerHistoryCommand,
+} from "./commands/marketmaker.js";
+import {
+  templateListCommand,
+  templateGetCommand,
+  templateLoadCommand,
+  templateDeleteCommand,
+} from "./commands/template.js";
 import { cleanupStaleOld } from "./upgrade/swap.js";
 import { CURRENT_VERSION } from "./version.js";
 
@@ -170,6 +189,125 @@ backtest
   .option("--json", "Emit machine-readable JSON")
   .action(async (opts) => {
     await backtestLimitsCommand({ json: !!opts.json });
+  });
+
+// ─── Signals (provider analytics) ────────────────────────────────────────
+
+const signals = program
+  .command("signals")
+  .description("Signal-provider analytics (for signal publishers)");
+
+signals
+  .command("list")
+  .alias("ls")
+  .description("List signals this provider has published")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await signalsListCommand({ json: !!opts.json });
+  });
+
+signals
+  .command("stats")
+  .description("Overall provider stats (subscribers, total PnL, etc.)")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await signalsStatsCommand({ json: !!opts.json });
+  });
+
+signals
+  .command("performance")
+  .description("Performance stats (winrate, avg profit per signal, etc.)")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await signalsPerformanceCommand({ json: !!opts.json });
+  });
+
+// ─── Arbitrage ───────────────────────────────────────────────────────────
+
+const arbitrage = program
+  .command("arbitrage")
+  .description("Exchange arbitrage — read-only helpers");
+
+arbitrage
+  .command("history")
+  .description("List past exchange-arbitrage runs")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await arbitrageHistoryCommand({ json: !!opts.json });
+  });
+
+arbitrage
+  .command("total")
+  .description("Running totals across exchange-arbitrage runs")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await arbitrageTotalCommand({ json: !!opts.json });
+  });
+
+// ─── Market Maker ────────────────────────────────────────────────────────
+
+const marketmaker = program
+  .command("marketmaker")
+  .description("Market-maker bot inspection");
+
+marketmaker
+  .command("get <hopper-id>")
+  .description("Fetch the market-maker state for a hopper")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (hopperId: string, opts) => {
+    await marketmakerGetCommand(hopperId, { json: !!opts.json });
+  });
+
+marketmaker
+  .command("history <hopper-id>")
+  .description("Historical order activity for a market-maker hopper")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (hopperId: string, opts) => {
+    await marketmakerHistoryCommand(hopperId, { json: !!opts.json });
+  });
+
+// ─── Templates ───────────────────────────────────────────────────────────
+
+const template = program
+  .command("template")
+  .description("Bot templates (reusable hopper configurations)");
+
+template
+  .command("list")
+  .alias("ls")
+  .description("List all templates available to you")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await templateListCommand({ json: !!opts.json });
+  });
+
+template
+  .command("get <id>")
+  .description("Fetch a single template (full config)")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (id: string, opts) => {
+    await templateGetCommand(id, { json: !!opts.json });
+  });
+
+template
+  .command("load <template-id> <hopper-id>")
+  .description("Apply a template to a hopper — overwrites the hopper's config")
+  .option("--yes", "Acknowledge the overwrite")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (templateId: string, hopperId: string, opts) => {
+    await templateLoadCommand(templateId, hopperId, {
+      yes: !!opts.yes,
+      json: !!opts.json,
+    });
+  });
+
+template
+  .command("delete <id>")
+  .description("Delete a template")
+  .option("--yes", "Acknowledge the destructive action")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (id: string, opts) => {
+    await templateDeleteCommand(id, { yes: !!opts.yes, json: !!opts.json });
   });
 
 // ─── Upgrade ─────────────────────────────────────────────────────────────

@@ -1,6 +1,20 @@
 # Changelog
 
-## 0.1.0-alpha.2 — Unreleased
+## 0.2.0-alpha.1 — Unreleased
+
+Follows `@cryptohopper/sdk@0.2.0-alpha.1` and adds CLI commands for the new resources.
+
+### Added
+- **`signals list`**, **`signals stats`**, **`signals performance`** — signal-provider analytics.
+- **`arbitrage history`**, **`arbitrage total`** — read-only arbitrage helpers. (Starting new arbitrage runs remains SDK-only for v0.2 — too many params for ergonomic CLI flags; revisit with an interactive wizard in v0.3.)
+- **`marketmaker get <hopper-id>`**, **`marketmaker history <hopper-id>`** — market-maker bot inspection.
+- **`template list`**, **`template get <id>`**, **`template load <template-id> <hopper-id> --yes`**, **`template delete <id> --yes`** — template management.
+
+### Changed
+- `@cryptohopper/sdk` dep bumped to `^0.2.0-alpha.1`.
+- Shell completions updated to include the four new top-level commands.
+
+## 0.1.0-alpha.2 — 2026-04-24
 
 ### Changed
 - **`cryptohopper login` is now a real browser OAuth2 flow.** Opens your default browser to `https://www.cryptohopper.com/oauth2/authorize`, listens on `127.0.0.1:18765/callback` for the redirect, and exchanges the auth code for a bearer token at `/oauth2/token`. The CLI is registered as a public OAuth client on cryptohopper.com (no `client_secret`).
