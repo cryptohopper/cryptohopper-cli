@@ -1,10 +1,21 @@
 # cryptohopper-cli
 
+[![npm](https://img.shields.io/npm/v/@cryptohopper/cli?include_prereleases&logo=npm&label=%40cryptohopper%2Fcli)](https://www.npmjs.com/package/@cryptohopper/cli)
+[![GitHub release](https://img.shields.io/github/v/release/cryptohopper/cryptohopper-cli?include_prereleases&logo=github&label=binaries)](https://github.com/cryptohopper/cryptohopper-cli/releases/latest)
+[![Release downloads](https://img.shields.io/github/downloads/cryptohopper/cryptohopper-cli/total?logo=github&label=downloads)](https://github.com/cryptohopper/cryptohopper-cli/releases)
+[![CI](https://github.com/cryptohopper/cryptohopper-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/cryptohopper/cryptohopper-cli/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/github/license/cryptohopper/cryptohopper-cli?color=blue)](LICENSE)
+
 Command-line interface for [Cryptohopper](https://www.cryptohopper.com).
 
-> **Status: 0.1.0-alpha.2** — early access. Standalone binaries for macOS (arm64 + x64), Linux x64, and Windows x64.
+> **Status: 0.5.0-alpha.1** — alpha. Published to npm as `@cryptohopper/cli`; standalone binaries for macOS (arm64 + x64), Linux x64, and Windows x64 attached to every GitHub release.
 
 ## Install
+
+### Via npm (all platforms)
+```bash
+npm install -g @cryptohopper/cli
+```
 
 ### macOS (Apple Silicon)
 ```bash
