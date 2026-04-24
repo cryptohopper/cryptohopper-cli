@@ -6,6 +6,7 @@
  *   CRYPTOHOPPER_TOKEN     — bypass the stored token (CI, scripts)
  *   CRYPTOHOPPER_APP_KEY   — optional OAuth client_id, sent as x-api-app-key
  *   CRYPTOHOPPER_API_URL   — point the CLI at staging / a local dev server
+ *   CRYPTOHOPPER_WEB_URL   — origin of the OAuth consent pages (authorize/token)
  */
 
 import { promises as fs } from "node:fs";
@@ -13,6 +14,7 @@ import path from "node:path";
 import os from "node:os";
 
 const DEFAULT_API_URL = "https://api.cryptohopper.com/v1";
+const DEFAULT_WEB_URL = "https://www.cryptohopper.com";
 
 export interface StoredUser {
   id?: string | number;
@@ -22,6 +24,7 @@ export interface StoredUser {
 
 export interface ConfigFile {
   apiUrl?: string;
+  webUrl?: string;
   token?: string;
   appKey?: string;
   user?: StoredUser;
@@ -64,6 +67,7 @@ export async function clearStoredToken(): Promise<void> {
 
 export interface ResolvedConfig {
   apiUrl: string;
+  webUrl: string;
   token?: string;
   appKey?: string;
   user?: StoredUser;
@@ -73,6 +77,7 @@ export async function resolveConfig(): Promise<ResolvedConfig> {
   const file = await readConfig();
   return {
     apiUrl: process.env.CRYPTOHOPPER_API_URL ?? file.apiUrl ?? DEFAULT_API_URL,
+    webUrl: process.env.CRYPTOHOPPER_WEB_URL ?? file.webUrl ?? DEFAULT_WEB_URL,
     token: process.env.CRYPTOHOPPER_TOKEN ?? file.token,
     appKey: process.env.CRYPTOHOPPER_APP_KEY ?? file.appKey,
     user: process.env.CRYPTOHOPPER_TOKEN ? undefined : file.user,

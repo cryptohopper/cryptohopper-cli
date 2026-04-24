@@ -2,7 +2,7 @@
 
 Command-line interface for [Cryptohopper](https://www.cryptohopper.com).
 
-> **Status: 0.1.0-alpha.1** — early access. Standalone binaries for macOS (arm64 + x64), Linux x64, and Windows x64.
+> **Status: 0.1.0-alpha.2** — early access. Standalone binaries for macOS (arm64 + x64), Linux x64, and Windows x64.
 
 ## Install
 
@@ -32,7 +32,7 @@ Verify with `sha256sum -c SHA256SUMS` (macOS/Linux) / `certutil -hashfile crypto
 ## Quickstart
 
 ```bash
-cryptohopper login                     # paste your OAuth token from the dev dashboard
+cryptohopper login                     # opens your browser to authorize via OAuth2
 cryptohopper whoami                    # confirm identity
 cryptohopper hoppers list              # list your bots
 cryptohopper positions <hopper-id>     # open positions
@@ -46,17 +46,30 @@ All commands accept `--json` for scripting.
 
 ## Authentication
 
-Cryptohopper uses OAuth2 bearer tokens. To get one:
+`cryptohopper login` drives a browser-based OAuth2 authorization-code flow:
 
-1. Sign in at [cryptohopper.com](https://www.cryptohopper.com) → developer dashboard.
-2. Create an OAuth application — you'll receive a `client_id` and `client_secret`.
-3. Drive the OAuth consent flow (`/oauth-consent?app_id=<client_id>&redirect_uri=<your_uri>&state=<csrf>`) to receive a 40-character bearer token scoped to the permissions you requested.
-4. Run `cryptohopper login` and paste the token.
+1. The CLI starts a one-shot listener on `http://127.0.0.1:18765/callback`.
+2. Your default browser opens Cryptohopper's consent page.
+3. You click "Allow" for the scopes the CLI requests (`read manage trade user`).
+4. Cryptohopper redirects to `127.0.0.1:18765/callback?code=...&state=...`.
+5. The CLI exchanges the code for a bearer token and saves it to `~/.cryptohopper/config.json` (mode 0600).
 
-Env overrides (useful in CI):
+The CLI is a public OAuth client — no `client_secret` is sent. Security relies on strict server-side redirect-URI matching, a random `state` nonce per login, and the loopback-only listener.
+
+### Fallback: paste-token (CI, SSH, no-browser)
+
+If you already have a bearer token, skip the browser flow:
+
+```bash
+cryptohopper login --token <your-40-char-token>
+```
+
+### Env overrides
+
 - `CRYPTOHOPPER_TOKEN` — bearer token; skips login entirely
 - `CRYPTOHOPPER_APP_KEY` — OAuth `client_id`, sent as `x-api-app-key`
-- `CRYPTOHOPPER_API_URL` — staging override
+- `CRYPTOHOPPER_API_URL` — staging override (defaults to `https://api.cryptohopper.com/v1`)
+- `CRYPTOHOPPER_WEB_URL` — OAuth consent origin override (defaults to `https://www.cryptohopper.com`)
 
 Config is stored at `~/.cryptohopper/config.json` with `0600` perms.
 

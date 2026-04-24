@@ -6,7 +6,7 @@ interface CommonOpts {
   json?: boolean;
 }
 
-const SETTABLE_KEYS = ["apiUrl", "appKey"] as const;
+const SETTABLE_KEYS = ["apiUrl", "webUrl", "appKey"] as const;
 type SettableKey = (typeof SETTABLE_KEYS)[number];
 
 export async function configGetCommand(
@@ -57,6 +57,7 @@ export async function configSetCommand(
 function redact(cfg: ConfigFile): Record<string, string | undefined> {
   const out: Record<string, string | undefined> = {
     apiUrl: cfg.apiUrl,
+    webUrl: cfg.webUrl,
     appKey: cfg.appKey,
     token: cfg.token ? `${cfg.token.slice(0, 4)}…${cfg.token.slice(-4)}` : undefined,
     user: cfg.user

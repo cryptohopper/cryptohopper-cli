@@ -1,6 +1,16 @@
 # Changelog
 
-## 0.1.0-alpha.1 — Unreleased
+## 0.1.0-alpha.2 — Unreleased
+
+### Changed
+- **`cryptohopper login` is now a real browser OAuth2 flow.** Opens your default browser to `https://www.cryptohopper.com/oauth2/authorize`, listens on `127.0.0.1:18765/callback` for the redirect, and exchanges the auth code for a bearer token at `/oauth2/token`. The CLI is registered as a public OAuth client on cryptohopper.com (no `client_secret`).
+- The paste-token flow is retained as `--token <value>` for CI, SSH, and other headless environments.
+
+### Added
+- `CRYPTOHOPPER_WEB_URL` env override for pointing at staging OAuth consent pages.
+- `webUrl` added to the config file and to `cryptohopper config get` / `set`.
+
+## 0.1.0-alpha.1 — 2026-04-24
 
 Initial release. Standalone binaries on GitHub Releases; Bun `--compile` cross-compiled for linux-x64, darwin-x64, darwin-arm64, windows-x64.
 

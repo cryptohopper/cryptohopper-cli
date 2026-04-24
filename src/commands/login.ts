@@ -1,13 +1,25 @@
 import { CryptohopperClient, CryptohopperError } from "@cryptohopper/sdk";
 import pc from "picocolors";
-import readline from "node:readline/promises";
 
 import { persistLogin, resolveConfig } from "../config.js";
 import { CURRENT_VERSION } from "../version.js";
 import { fail } from "../api.js";
+import { runBrowserFlow } from "../auth/browser-flow.js";
+
+/**
+ * `client_id` of the first-party `cryptohopper-cli` OAuth2 application on
+ * cryptohopper.com. Public identifier, safe to embed. Registered against
+ * redirect_uri `http://127.0.0.1:18765/callback`.
+ */
+const CLI_CLIENT_ID =
+  "kOeSoGu66gCi3ImQphJspSBJlsUljI5XQXp3edbgne6X3cQfoK3ocNefygrCgChC";
 
 export interface LoginOptions {
+  /** Skip the browser flow entirely and use a pre-obtained bearer token. */
   token?: string;
+  /** Override the OAuth client_id used for the browser flow (testing only). */
+  clientId?: string;
+  /** Override the OAuth client_id to send as `x-api-app-key` on subsequent calls. */
   appKey?: string;
   json?: boolean;
 }
@@ -15,19 +27,47 @@ export interface LoginOptions {
 export async function loginCommand(opts: LoginOptions): Promise<void> {
   const cfg = await resolveConfig();
   const json = opts.json ?? false;
+  const clientId = opts.clientId ?? CLI_CLIENT_ID;
 
-  let token = opts.token?.trim() ?? "";
-  if (!token) {
-    token = await promptForToken();
-  }
-  if (!token) {
-    return fail(new Error("No token provided."), json);
+  let token: string;
+  let appKey: string | undefined = opts.appKey;
+
+  if (opts.token?.trim()) {
+    // --token: paste-token path. Useful for CI or SSH where we can't open
+    // a browser. User has obtained the token some other way (e.g. manual
+    // /oauth2/authorize in a browser + copy-paste).
+    token = opts.token.trim();
+  } else {
+    if (!json) {
+      console.log("Opening your browser to authorize with Cryptohopper...");
+      console.log(
+        pc.dim(
+          "(If nothing opens, copy the URL printed below into your browser manually.)",
+        ),
+      );
+    }
+    try {
+      const result = await runBrowserFlow({
+        clientId,
+        webUrl: cfg.webUrl,
+        onAuthUrl: (url) => {
+          if (!json) console.log(pc.dim(`\n  ${url}\n`));
+        },
+      });
+      token = result.accessToken;
+      // Default appKey to the CLI's own client_id so downstream API calls
+      // send `x-api-app-key` — lets the server attribute traffic per app,
+      // and keeps the CLI distinguishable from other integrations.
+      if (!appKey) appKey = clientId;
+    } catch (err) {
+      return fail(err, json);
+    }
   }
 
-  // Verify the token by calling user.get()
+  // Verify the token by calling user.get() before we persist anything.
   const client = new CryptohopperClient({
     apiKey: token,
-    appKey: opts.appKey,
+    appKey,
     baseUrl: cfg.apiUrl,
     userAgent: `cryptohopper-cli/${CURRENT_VERSION}`,
   });
@@ -42,7 +82,7 @@ export async function loginCommand(opts: LoginOptions): Promise<void> {
     await persistLogin({
       apiUrl: cfg.apiUrl,
       token,
-      appKey: opts.appKey,
+      appKey,
       user,
     });
 
@@ -57,30 +97,12 @@ export async function loginCommand(opts: LoginOptions): Promise<void> {
     if (err instanceof CryptohopperError && err.code === "UNAUTHORIZED") {
       return fail(
         new Error(
-          "Token rejected by Cryptohopper. Create an OAuth app at " +
-            "https://www.cryptohopper.com (developer dashboard), then paste the issued token.",
+          "Token rejected by Cryptohopper. It may have expired or been revoked. " +
+            "Re-run `cryptohopper login` to try again.",
         ),
         json,
       );
     }
     return fail(err, json);
-  }
-}
-
-async function promptForToken(): Promise<string> {
-  console.log(
-    "Paste your Cryptohopper OAuth token. Get one from the developer",
-  );
-  console.log("dashboard: https://www.cryptohopper.com → Account → Developer.");
-  console.log("");
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  try {
-    const answer = await rl.question("Token: ");
-    return answer.trim();
-  } finally {
-    rl.close();
   }
 }

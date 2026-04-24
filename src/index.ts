@@ -37,9 +37,17 @@ program
 
 program
   .command("login")
-  .description("Authenticate against Cryptohopper using an OAuth bearer token")
-  .option("--token <token>", "Token value (skips prompt). Prefer the prompt or env var.")
-  .option("--app-key <clientId>", "OAuth client_id, sent as x-api-app-key on every request")
+  .description(
+    "Authenticate against Cryptohopper via a browser-based OAuth consent flow",
+  )
+  .option(
+    "--token <token>",
+    "Skip the browser flow and use a pre-obtained bearer token (for CI / SSH)",
+  )
+  .option(
+    "--app-key <clientId>",
+    "Override the OAuth client_id sent as x-api-app-key on every request",
+  )
   .option("--json", "Emit machine-readable JSON")
   .action(async (opts) => {
     await loginCommand({
@@ -191,7 +199,7 @@ config
 
 config
   .command("set <key> <value>")
-  .description("Set a config value. Settable: apiUrl, appKey")
+  .description("Set a config value. Settable: apiUrl, webUrl, appKey")
   .option("--json", "Emit machine-readable JSON")
   .action(async (key: string, value: string, opts) => {
     await configSetCommand(key, value, { json: !!opts.json });
