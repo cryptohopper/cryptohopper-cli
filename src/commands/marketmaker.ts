@@ -1,6 +1,7 @@
 import pc from "picocolors";
 
 import { fail, getClient } from "../api.js";
+import { fmt, printTable } from "../ui/table.js";
 
 interface CommonOpts {
   json?: boolean;
@@ -40,13 +41,15 @@ export async function marketmakerHistoryCommand(
       console.log(pc.dim("No history."));
       return;
     }
-    for (const r of rows) {
-      const id = String(r["id"] ?? "—");
-      const type = String(r["type"] ?? "?");
-      const amount = String(r["amount"] ?? "?");
-      const price = String(r["price"] ?? r["rate"] ?? "?");
-      console.log(`${id.padEnd(10)} ${type.padEnd(6)} ${amount.padEnd(12)} @ ${price}`);
-    }
+    printTable(
+      ["ID", "Type", "Amount", "Price"],
+      rows.map((r) => [
+        fmt(r["id"]),
+        fmt(r["type"]),
+        fmt(r["amount"]),
+        fmt(r["price"] ?? r["rate"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }

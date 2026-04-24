@@ -1,6 +1,7 @@
 import pc from "picocolors";
 
 import { fail, getClient } from "../api.js";
+import { fmt, printTable } from "../ui/table.js";
 
 interface CommonOpts {
   json?: boolean;
@@ -19,12 +20,14 @@ export async function templateListCommand(opts: CommonOpts): Promise<void> {
       console.log(pc.dim("No templates."));
       return;
     }
-    for (const t of rows) {
-      const id = String(t.id ?? "—");
-      const name = (t.name as string | undefined) ?? "(unnamed)";
-      const desc = (t.description as string | undefined) ?? "";
-      console.log(`${pc.bold(id.padEnd(8))} ${name.padEnd(28)} ${pc.dim(desc)}`);
-    }
+    printTable(
+      ["ID", "Name", "Description"],
+      rows.map((t) => [
+        fmt(t.id),
+        (t.name as string | undefined) ?? "(unnamed)",
+        fmt(t.description),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }

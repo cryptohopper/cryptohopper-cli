@@ -1,6 +1,7 @@
 import pc from "picocolors";
 
 import { fail, getClient } from "../api.js";
+import { fmt, printTable } from "../ui/table.js";
 
 interface CommonOpts {
   json?: boolean;
@@ -49,13 +50,15 @@ export async function signalsListCommand(opts: CommonOpts): Promise<void> {
       console.log(pc.dim("No signals published."));
       return;
     }
-    for (const s of rows) {
-      const id = String(s["id"] ?? "—");
-      const market = (s["market"] as string | undefined) ?? "?";
-      const type = (s["type"] as string | undefined) ?? "?";
-      const created = (s["created_at"] as string | undefined) ?? "";
-      console.log(`${id.padEnd(10)} ${market.padEnd(16)} ${type.padEnd(8)} ${pc.dim(created)}`);
-    }
+    printTable(
+      ["ID", "Market", "Type", "Created"],
+      rows.map((s) => [
+        fmt(s["id"]),
+        fmt(s["market"]),
+        fmt(s["type"]),
+        fmt(s["created_at"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }

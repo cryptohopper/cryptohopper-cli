@@ -1,6 +1,7 @@
 import pc from "picocolors";
 
 import { fail, getClient } from "../api.js";
+import { fmt, printTable } from "../ui/table.js";
 
 interface CommonOpts {
   json?: boolean;
@@ -19,13 +20,15 @@ export async function arbitrageHistoryCommand(opts: CommonOpts): Promise<void> {
       console.log(pc.dim("No arbitrage history."));
       return;
     }
-    for (const r of rows) {
-      const id = String(r["id"] ?? "—");
-      const profit = String(r["profit"] ?? "?");
-      const markets = (r["markets"] as string | undefined) ?? "";
-      const created = (r["created_at"] as string | undefined) ?? "";
-      console.log(`${id.padEnd(10)} ${profit.padEnd(12)} ${markets.padEnd(24)} ${pc.dim(created)}`);
-    }
+    printTable(
+      ["ID", "Profit", "Markets", "Created"],
+      rows.map((r) => [
+        fmt(r["id"]),
+        fmt(r["profit"]),
+        fmt(r["markets"]),
+        fmt(r["created_at"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }

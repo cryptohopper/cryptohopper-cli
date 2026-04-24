@@ -1,6 +1,15 @@
 # Changelog
 
-## 0.4.0-alpha.1 — Unreleased
+## 0.5.0-alpha.1 — Unreleased
+
+### Added
+- **CLI is now published to npm as `@cryptohopper/cli`**, in addition to the existing standalone binaries on GitHub Releases. Install via `npm i -g @cryptohopper/cli` or run on demand with `npx @cryptohopper/cli ...`. The Bun-compiled binaries remain the recommended install path for non-Node users (faster cold start, no Node dependency).
+- **Unicode table formatting** for every list/history command (`hoppers list`, `positions`, `orders`, `tournaments list/active/leaderboard`, `template list`, `signals list`, `ai models`, `arbitrage history`, `marketmaker history`, `subscription plans`). Backed by `cli-table3`.
+
+### Changed
+- Added `cli-table3` as a runtime dependency.
+
+## 0.4.0-alpha.1 — 2026-04-24
 
 Follows `@cryptohopper/sdk@0.4.0-alpha.1`. Adds tournaments commands.
 

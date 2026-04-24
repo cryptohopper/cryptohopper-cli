@@ -1,6 +1,7 @@
 import pc from "picocolors";
 
 import { fail, getClient } from "../api.js";
+import { fmt, printTable } from "../ui/table.js";
 
 interface CommonOpts {
   json?: boolean;
@@ -34,15 +35,15 @@ export async function subscriptionPlansCommand(opts: CommonOpts): Promise<void> 
       console.log(pc.dim("No plans available."));
       return;
     }
-    for (const p of rows) {
-      const id = String(p["id"] ?? "—");
-      const name = (p["name"] as string | undefined) ?? "(unnamed)";
-      const price = String(p["price"] ?? p["amount"] ?? "?");
-      const interval = (p["interval"] as string | undefined) ?? "";
-      console.log(
-        `${pc.bold(id.padEnd(6))} ${name.padEnd(24)} ${price.padEnd(10)} ${pc.dim(interval)}`,
-      );
-    }
+    printTable(
+      ["ID", "Name", "Price", "Interval"],
+      rows.map((p) => [
+        fmt(p["id"]),
+        (p["name"] as string | undefined) ?? "(unnamed)",
+        fmt(p["price"] ?? p["amount"]),
+        fmt(p["interval"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }

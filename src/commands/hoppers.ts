@@ -1,6 +1,7 @@
 import pc from "picocolors";
 
 import { fail, getClient } from "../api.js";
+import { fmt, printTable } from "../ui/table.js";
 
 interface CommonOpts {
   json?: boolean;
@@ -23,12 +24,15 @@ export async function hoppersListCommand(
       console.log(pc.dim("No hoppers found."));
       return;
     }
-    for (const h of rows) {
-      const id = String(h["id"] ?? "—");
-      const name = (h["name"] as string | undefined) ?? "(unnamed)";
-      const exchange = (h["exchange"] as string | undefined) ?? "";
-      console.log(`${pc.bold(id.padEnd(8))}  ${name.padEnd(30)} ${pc.dim(exchange)}`);
-    }
+    printTable(
+      ["ID", "Name", "Exchange", "Enabled"],
+      rows.map((h) => [
+        fmt(h["id"]),
+        (h["name"] as string | undefined) ?? "(unnamed)",
+        fmt(h["exchange"]),
+        fmt(h["enabled"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }
@@ -95,12 +99,15 @@ export async function positionsCommand(
       console.log(pc.dim("No open positions."));
       return;
     }
-    for (const p of rows) {
-      const coin = (p["coin"] as string | undefined) ?? "?";
-      const amount = String(p["amount"] ?? "?");
-      const rate = String(p["rate"] ?? p["price"] ?? "?");
-      console.log(`${pc.bold(coin.padEnd(8))}  ${amount.padEnd(16)} @ ${rate}`);
-    }
+    printTable(
+      ["Coin", "Amount", "Rate", "Current value"],
+      rows.map((p) => [
+        fmt(p["coin"]),
+        fmt(p["amount"]),
+        fmt(p["rate"] ?? p["price"]),
+        fmt(p["current_value"] ?? p["result_bought"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }
@@ -122,13 +129,16 @@ export async function ordersCommand(
       console.log(pc.dim("No orders."));
       return;
     }
-    for (const o of rows) {
-      const id = String(o["id"] ?? "—");
-      const type = String(o["type"] ?? "?");
-      const market = (o["market"] as string | undefined) ?? "?";
-      const amount = String(o["amount"] ?? "?");
-      console.log(`${id.padEnd(10)} ${type.padEnd(6)} ${market.padEnd(16)} ${amount}`);
-    }
+    printTable(
+      ["ID", "Type", "Market", "Amount", "Price"],
+      rows.map((o) => [
+        fmt(o["id"]),
+        fmt(o["type"]),
+        fmt(o["market"]),
+        fmt(o["amount"]),
+        fmt(o["price"]),
+      ]),
+    );
   } catch (err) {
     return fail(err, json);
   }
