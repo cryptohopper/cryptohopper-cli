@@ -27,7 +27,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^25",
     "tsup": "^8",
     "typescript": "^5"
   },
