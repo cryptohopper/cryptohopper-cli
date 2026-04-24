@@ -8,7 +8,9 @@
 
 Command-line interface for [Cryptohopper](https://www.cryptohopper.com).
 
-> **Status: 0.5.0-alpha.1** — alpha. Published to npm as `@cryptohopper/cli`; standalone binaries for macOS (arm64 + x64), Linux x64, and Windows x64 attached to every GitHub release.
+> **Status: 0.5.1-alpha.1** — alpha. Published to npm as `@cryptohopper/cli`; standalone binaries for macOS (arm64 + x64), Linux x64, and Windows x64 attached to every GitHub release.
+
+**Deeper docs:** [Scripting & CI](docs/Scripting.md) · [Troubleshooting](docs/Troubleshooting.md) · [Public CLI reference](https://github.com/cryptohopper/cryptohopper-resources/blob/main/docs/cli.md)
 
 ## Install
 
