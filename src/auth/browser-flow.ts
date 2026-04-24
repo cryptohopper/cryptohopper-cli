@@ -213,11 +213,12 @@ async function exchangeCodeForToken(
   }
 
   if (!res.ok) {
+    // text.slice() always returns a string, so `??` on it never falls through
+    // to the HTTP status — use `||` to treat empty bodies as falsy.
     const msg =
       (parsed?.["error_description"] as string | undefined) ??
       (parsed?.["error"] as string | undefined) ??
-      text.slice(0, 200) ??
-      `HTTP ${res.status}`;
+      (text.slice(0, 200) || `HTTP ${res.status}`);
     throw new Error(`Token exchange failed: ${msg}`);
   }
 

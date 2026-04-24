@@ -57,13 +57,20 @@ export async function templateLoadCommand(
   opts: CommonOpts & { yes?: boolean },
 ): Promise<void> {
   const json = opts.json ?? false;
-  if (!opts.yes && !json) {
-    console.error(
-      pc.yellow(
-        `Loading template ${templateId} into hopper ${hopperId} overwrites that hopper's config. ` +
-          `Re-run with --yes to confirm.`,
-      ),
-    );
+  if (!opts.yes) {
+    const msg =
+      `Loading template ${templateId} into hopper ${hopperId} overwrites that hopper's config. ` +
+      `Re-run with --yes to confirm.`;
+    if (json) {
+      console.error(
+        JSON.stringify({
+          ok: false,
+          error: { code: "CONFIRMATION_REQUIRED", message: msg },
+        }),
+      );
+    } else {
+      console.error(pc.yellow(msg));
+    }
     process.exit(1);
   }
   const { client } = await getClient({ requireAuth: true });
@@ -88,12 +95,18 @@ export async function templateDeleteCommand(
   opts: CommonOpts & { yes?: boolean },
 ): Promise<void> {
   const json = opts.json ?? false;
-  if (!opts.yes && !json) {
-    console.error(
-      pc.yellow(
-        `This will delete template ${templateId} permanently. Re-run with --yes to confirm.`,
-      ),
-    );
+  if (!opts.yes) {
+    const msg = `This will delete template ${templateId} permanently. Re-run with --yes to confirm.`;
+    if (json) {
+      console.error(
+        JSON.stringify({
+          ok: false,
+          error: { code: "CONFIRMATION_REQUIRED", message: msg },
+        }),
+      );
+    } else {
+      console.error(pc.yellow(msg));
+    }
     process.exit(1);
   }
   const { client } = await getClient({ requireAuth: true });

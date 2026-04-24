@@ -61,13 +61,20 @@ export async function hoppersPanicCommand(
   opts: CommonOpts & { yes?: boolean },
 ): Promise<void> {
   const json = opts.json ?? false;
-  if (!opts.yes && !json) {
-    console.error(
-      pc.yellow(
-        `Panic will market-sell every position on hopper ${hopperId}. ` +
-          `Re-run with --yes to confirm.`,
-      ),
-    );
+  if (!opts.yes) {
+    const msg =
+      `Panic will market-sell every position on hopper ${hopperId}. ` +
+      `Re-run with --yes to confirm.`;
+    if (json) {
+      console.error(
+        JSON.stringify({
+          ok: false,
+          error: { code: "CONFIRMATION_REQUIRED", message: msg },
+        }),
+      );
+    } else {
+      console.error(pc.yellow(msg));
+    }
     process.exit(1);
   }
   const { client } = await getClient({ requireAuth: true });

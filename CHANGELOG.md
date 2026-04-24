@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.1-alpha.1 — 2026-04-25
+
+### Fixed
+- **Critical: destructive commands bypassed the `--yes` confirmation gate when `--json` was passed.** `hoppers panic`, `template load`, and `template delete` all used `if (!opts.yes && !json)` to decide whether to print the confirmation warning, which caused them to *execute the destructive action* when `--json` was passed without `--yes`. The `--yes` gate now always applies; in `--json` mode the refusal is emitted as JSON (`{ "ok": false, "error": { "code": "CONFIRMATION_REQUIRED", "message": ... } }`) to stderr with exit code 1.
+- **OAuth token-exchange error message was empty on empty HTTP bodies.** The fallback chain used `??` on `text.slice(0, 200)`, which always returns a string — meaning the `HTTP <status>` tail was unreachable, and empty error bodies produced `Token exchange failed:` with nothing useful. Switched to `||` so empty bodies fall through to the status code.
+
+### Security note
+If you have scripts that relied on `--json` silently bypassing confirmation on `hoppers panic` / `template load` / `template delete`, they will now fail with a `CONFIRMATION_REQUIRED` error and exit code 1. Add `--yes` to restore the prior behaviour — but note that prior behaviour was unintended and dangerous.
+
 ## 0.5.0-alpha.1 — Unreleased
 
 ### Added
