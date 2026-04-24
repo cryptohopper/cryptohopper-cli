@@ -1,6 +1,21 @@
 # Changelog
 
-## 0.3.0-alpha.1 — Unreleased
+## 0.4.0-alpha.1 — Unreleased
+
+Follows `@cryptohopper/sdk@0.4.0-alpha.1`. Adds tournaments commands.
+
+### Added
+- **`tournaments list`** — list all tournaments.
+- **`tournaments active`** — list currently-active tournaments (public, no auth).
+- **`tournaments leaderboard <tournament-id>`** — leaderboard for a specific tournament.
+
+(Social / webhooks / app commands deferred — social is visual-UI heavy, webhooks is a one-shot setup flow typically done through the dev dashboard, and app is mobile-only internals.)
+
+### Changed
+- `@cryptohopper/sdk` dep bumped to `^0.4.0-alpha.1`.
+- Shell completions updated with `tournaments`.
+
+## 0.3.0-alpha.1 — 2026-04-24
 
 Follows `@cryptohopper/sdk@0.3.0-alpha.1`. Adds CLI commands for the A2 resources that make sense in a terminal.
 

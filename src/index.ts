@@ -47,6 +47,11 @@ import {
   subscriptionPlansCommand,
   subscriptionCreditsCommand,
 } from "./commands/subscription.js";
+import {
+  tournamentsListCommand,
+  tournamentsActiveCommand,
+  tournamentsLeaderboardCommand,
+} from "./commands/tournaments.js";
 import { cleanupStaleOld } from "./upgrade/swap.js";
 import { CURRENT_VERSION } from "./version.js";
 
@@ -365,6 +370,37 @@ subscription
   .option("--json", "Emit machine-readable JSON")
   .action(async (opts) => {
     await subscriptionCreditsCommand({ json: !!opts.json });
+  });
+
+// ─── Tournaments ─────────────────────────────────────────────────────────
+
+const tournaments = program
+  .command("tournaments")
+  .description("Trading competitions");
+
+tournaments
+  .command("list")
+  .alias("ls")
+  .description("List all tournaments")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await tournamentsListCommand({ json: !!opts.json });
+  });
+
+tournaments
+  .command("active")
+  .description("List currently-active tournaments (public)")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await tournamentsActiveCommand({ json: !!opts.json });
+  });
+
+tournaments
+  .command("leaderboard <tournament-id>")
+  .description("Leaderboard for a specific tournament")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (tournamentId: string, opts) => {
+    await tournamentsLeaderboardCommand(tournamentId, { json: !!opts.json });
   });
 
 // ─── Upgrade ─────────────────────────────────────────────────────────────

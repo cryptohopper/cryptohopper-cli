@@ -19,6 +19,7 @@ const TOP = [
   "template",
   "ai",
   "subscription",
+  "tournaments",
   "upgrade",
   "config",
   "completion",
