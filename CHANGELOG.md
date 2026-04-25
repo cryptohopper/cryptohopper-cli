@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0-alpha.1 — 2026-04-25
+
+### Added
+
+- **`cryptohopper strategy list`** (alias `ls`) — list all your saved trading strategies in a table.
+- **`cryptohopper strategy get <id>`** — pretty-print a strategy's full config as JSON.
+- **`cryptohopper exchange list`** (alias `ls`) — list all supported exchanges. Public endpoint, no auth needed.
+- **`cryptohopper exchange markets <exchange>`** — list every trading pair available on an exchange. Public.
+
+All four commands accept `--json` like the rest of the CLI and follow the same exit-code contract.
+
 ## 0.5.1-alpha.1 — 2026-04-25
 
 ### Fixed

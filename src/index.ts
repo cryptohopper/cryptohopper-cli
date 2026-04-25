@@ -52,6 +52,14 @@ import {
   tournamentsActiveCommand,
   tournamentsLeaderboardCommand,
 } from "./commands/tournaments.js";
+import {
+  strategyListCommand,
+  strategyGetCommand,
+} from "./commands/strategy.js";
+import {
+  exchangeExchangesCommand,
+  exchangeMarketsCommand,
+} from "./commands/exchange.js";
 import { cleanupStaleOld } from "./upgrade/swap.js";
 import { CURRENT_VERSION } from "./version.js";
 
@@ -401,6 +409,52 @@ tournaments
   .option("--json", "Emit machine-readable JSON")
   .action(async (tournamentId: string, opts) => {
     await tournamentsLeaderboardCommand(tournamentId, { json: !!opts.json });
+  });
+
+// ─── Strategies ──────────────────────────────────────────────────────────
+
+const strategy = program
+  .command("strategy")
+  .description("User-defined trading strategies");
+
+strategy
+  .command("list")
+  .alias("ls")
+  .description("List all your strategies")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await strategyListCommand({ json: !!opts.json });
+  });
+
+strategy
+  .command("get <id>")
+  .description("Fetch a single strategy (full config)")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (id: string, opts) => {
+    await strategyGetCommand(id, { json: !!opts.json });
+  });
+
+// ─── Exchange catalog ────────────────────────────────────────────────────
+
+const exchange = program
+  .command("exchange")
+  .description("Public exchange catalog (no auth required)");
+
+exchange
+  .command("list")
+  .alias("ls")
+  .description("List supported exchanges")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (opts) => {
+    await exchangeExchangesCommand({ json: !!opts.json });
+  });
+
+exchange
+  .command("markets <exchange>")
+  .description("List trading pairs available on an exchange")
+  .option("--json", "Emit machine-readable JSON")
+  .action(async (exchangeName: string, opts) => {
+    await exchangeMarketsCommand(exchangeName, { json: !!opts.json });
   });
 
 // ─── Upgrade ─────────────────────────────────────────────────────────────
