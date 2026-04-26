@@ -25,6 +25,8 @@ export const CALLBACK_PORT = 18765;
 export const CALLBACK_PATH = "/callback";
 const DEFAULT_SCOPES = "read manage trade user";
 const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
+/** Total wall-clock deadline for the /oauth2/token POST including body read. */
+const TOKEN_EXCHANGE_TIMEOUT_MS = 30 * 1000;
 
 export interface BrowserFlowOptions {
   clientId: string;
@@ -59,9 +61,10 @@ export async function runBrowserFlow(
   authUrl.searchParams.set("state", state);
   authUrl.searchParams.set("scope", scopes);
 
-  const { code, receivedState } = await listenForCallback({
+  const { code } = await listenForCallback({
     port: CALLBACK_PORT,
     path: CALLBACK_PATH,
+    expectedState: state,
     timeoutMs,
     onReady: () => {
       opts.onAuthUrl?.(authUrl.toString());
@@ -69,12 +72,6 @@ export async function runBrowserFlow(
       openBrowser(authUrl.toString()).catch(() => {});
     },
   });
-
-  if (receivedState !== state) {
-    throw new Error(
-      "OAuth state mismatch — possible CSRF attempt. Aborted without storing a token.",
-    );
-  }
 
   return exchangeCodeForToken({
     tokenUrl: `${webUrl}/oauth2/token`,
@@ -87,13 +84,14 @@ export async function runBrowserFlow(
 interface CallbackListenerArgs {
   port: number;
   path: string;
+  expectedState: string;
   timeoutMs: number;
   onReady: () => void;
 }
 
 function listenForCallback(
   args: CallbackListenerArgs,
-): Promise<{ code: string; receivedState: string }> {
+): Promise<{ code: string }> {
   return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
       if (!req.url) {
@@ -127,10 +125,24 @@ function listenForCallback(
         return;
       }
 
+      // Validate state INSIDE the listener so the browser shows the same
+      // outcome as the CLI. Doing this after sending the success page
+      // would tell the user (or attacker) "✓ Logged in" while the CLI
+      // simultaneously aborts — misleading and security-adjacent.
+      if (receivedState !== args.expectedState) {
+        res.writeHead(400, { "content-type": "text/html; charset=utf-8" });
+        res.end(errorPage("OAuth state mismatch — possible CSRF attempt. Aborted without storing a token."));
+        cleanup();
+        reject(new Error(
+          "OAuth state mismatch — possible CSRF attempt. Aborted without storing a token.",
+        ));
+        return;
+      }
+
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
       res.end(successPage());
       cleanup();
-      resolve({ code, receivedState });
+      resolve({ code });
     });
 
     const timer = setTimeout(() => {
@@ -186,23 +198,50 @@ async function exchangeCodeForToken(
   // server accepts this because the app row has an empty client_secret
   // and bshaffer's `allow_public_clients` is true by default.
 
-  let res: Response;
-  try {
-    res = await fetch(args.tokenUrl, {
-      method: "POST",
-      headers: {
-        "content-type": "application/x-www-form-urlencoded",
-        accept: "application/json",
-      },
-      body: body.toString(),
-    });
-  } catch (err) {
-    throw new Error(
-      `Could not reach the token endpoint (${args.tokenUrl}): ${(err as Error).message}`,
-    );
-  }
+  // Total deadline covers connect + headers + body read. AbortSignal.timeout
+  // would only cover until the response arrived; the body could still hang.
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new Error("token exchange timed out")),
+    TOKEN_EXCHANGE_TIMEOUT_MS,
+  );
 
-  const text = await res.text();
+  let res: Response;
+  let text: string;
+  try {
+    try {
+      res = await fetch(args.tokenUrl, {
+        method: "POST",
+        headers: {
+          "content-type": "application/x-www-form-urlencoded",
+          accept: "application/json",
+        },
+        body: body.toString(),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if (controller.signal.aborted) {
+        throw new Error(
+          `Token exchange to ${args.tokenUrl} timed out after ${TOKEN_EXCHANGE_TIMEOUT_MS / 1000}s.`,
+        );
+      }
+      throw new Error(
+        `Could not reach the token endpoint (${args.tokenUrl}): ${(err as Error).message}`,
+      );
+    }
+    try {
+      text = await res.text();
+    } catch (err) {
+      if (controller.signal.aborted) {
+        throw new Error(
+          `Token exchange to ${args.tokenUrl} timed out reading the response after ${TOKEN_EXCHANGE_TIMEOUT_MS / 1000}s.`,
+        );
+      }
+      throw err;
+    }
+  } finally {
+    clearTimeout(timer);
+  }
   let parsed: Record<string, unknown> | null = null;
   if (text.length > 0) {
     try {
