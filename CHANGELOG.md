@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.6.0-alpha.2 — Unreleased
+
+### Fixed
+- **Critical: every authenticated API call was rejected by the gateway.** The CLI's underlying `@cryptohopper/sdk` v0.4.0-alpha.1 sent `Authorization: Bearer <token>` on every request, which the AWS API Gateway in front of `api.cryptohopper.com/v1/*` rejects with `405 Missing Authentication Token`. The Public API v1 actually uses an `access-token: <token>` header — confirmed via the official [API documentation](https://www.cryptohopper.com/api-documentation/how-the-api-works) and the legacy iOS/Android SDKs. Picks up the fix from [`@cryptohopper/sdk@0.4.0-alpha.2`](https://github.com/cryptohopper/cryptohopper-node-sdk/pull/9).
+
+### Compatibility
+No CLI surface change. Same flags, same JSON output, same exit codes. The only thing that changes is what the underlying SDK sends on the wire.
+
+### Upgrade
+- **npm**: `npm install -g @cryptohopper/cli@latest` (or `@0.6.0-alpha.2` explicitly).
+- **Standalone binary**: `cryptohopper upgrade` (or download from [GitHub Releases](https://github.com/cryptohopper/cryptohopper-cli/releases)).
+
+If you ran `cryptohopper login` on `0.6.0-alpha.1` and your saved token at `~/.cryptohopper/config.json` worked back then somehow (it shouldn't have — every authenticated call returned 405), no action needed. The token itself is still valid; only the header carrying it changes.
+
 ## 0.6.0-alpha.1 — 2026-04-25
 
 ### Added
