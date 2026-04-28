@@ -49,7 +49,7 @@ cryptohopper login                     # opens your browser to authorize via OAu
 cryptohopper whoami                    # confirm identity
 cryptohopper hoppers list              # list your bots
 cryptohopper positions <hopper-id>     # open positions
-cryptohopper ticker binance BTC/USDT   # public ticker (no auth)
+cryptohopper ticker binance BTC/USDT   # spot price (still requires `cryptohopper login`)
 cryptohopper backtest new <hopper-id> --from 2026-01-01 --to 2026-03-01
 cryptohopper backtest status <backtest-id>
 cryptohopper upgrade                   # self-update to latest release
